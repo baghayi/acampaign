@@ -1,4 +1,3 @@
-//#[macro_use]
 extern crate json;
 extern crate addr;
 use std::env;
@@ -6,8 +5,8 @@ use std::fmt;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
-use addr::Email;
-use std::process;
+use acampaign::Contact;
+use acampaign::Error;
 
 enum Module {
     Contacts(ModuleCommand),
@@ -50,15 +49,17 @@ fn main() {
         Module:: Contacts(command) => {
             match &command {
                 ModuleCommand::New(input) => {
-                    create_new_contact(&input);
+                    match create_new_contact(&input) {
+                        Err(e) => eprintln!("{:?}", e),
+                        Ok(_) => println!("created new contact"),
+                    }
                 }
             }
         }
     }
 }
 
-fn create_new_contact(input: &String) {
-    let input = json::parse(input).unwrap();
+fn create_new_contact(input: &String) -> Result<(), Error> {
     let filename = "data/contacts.csv";
     let mut needs_header = false;
     let mut contacts = OpenOptions::new()
@@ -73,20 +74,9 @@ fn create_new_contact(input: &String) {
         let _ = contacts.write(b"email\n");
     }
 
-    let email = input["email"].as_str();
-    match email {
-        None => eprint!("email is required!"),
-        Some(email) => {
-            validate_email(email);
-            let _ = contacts.write(email.as_bytes());
-            let _ = contacts.write_all(b"\n");
-        },
-    }
-}
+    let contact = Contact::from_json(input)?;
+    contacts.write(contact.email.as_bytes());
+    contacts.write(b"\n");
 
-fn validate_email(email: &str) {
-    let _: Email = email.parse().unwrap_or_else(|_| {
-        eprint!("email is not valid!\n");
-        process::exit(1);
-    });
+    Ok(())
 }
