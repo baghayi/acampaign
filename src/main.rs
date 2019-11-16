@@ -5,8 +5,8 @@ use std::fmt;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
-use acampaign::Contact;
-use acampaign::Error;
+use acampaign::contact::Contact;
+use acampaign::contact::Error;
 
 enum Module {
     Contacts(ModuleCommand),
