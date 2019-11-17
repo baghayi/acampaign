@@ -2,11 +2,9 @@ extern crate json;
 extern crate addr;
 use std::env;
 use std::fmt;
-use std::fs::File;
-use std::fs::OpenOptions;
-use std::io::Write;
 use acampaign::contacts::Contact;
 use acampaign::contacts::errors;
+use acampaign::contacts::storage::Contacts;
 
 enum Module {
     Contacts(ModuleCommand),
@@ -60,23 +58,8 @@ fn main() {
 }
 
 fn create_new_contact(input: &String) -> Result<(), errors::Error> {
-    let filename = "data/contacts.csv";
-    let mut needs_header = false;
-    let mut contacts = OpenOptions::new()
-        .append(true)
-        .open(filename)
-        .unwrap_or_else(|_| {
-            needs_header = true;
-            File::create(filename).unwrap()
-        });
-
-    if needs_header {
-        let _ = contacts.write(b"email\n");
-    }
-
     let contact = Contact::from_json(input)?;
-    let _ = contacts.write(contact.email.as_bytes());
-    let _ = contacts.write(b"\n");
-
+    let contacts = Contacts("data/contacts.csv");
+    contacts.store(&contact)?;
     Ok(())
 }

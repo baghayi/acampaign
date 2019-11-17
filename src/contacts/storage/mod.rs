@@ -3,7 +3,7 @@ use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use crate::contacts::errors::Error;
 
-pub struct Contacts(&'static str);
+pub struct Contacts(pub &'static str);
 
 impl Contacts {
     pub fn store(&self, contact: &Contact) -> Result<(), Error> {
