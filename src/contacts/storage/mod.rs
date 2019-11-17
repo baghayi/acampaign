@@ -8,7 +8,7 @@ pub struct Contacts(&'static str);
 impl Contacts {
     pub fn store(&self, contact: &Contact) {
         let _ = self.get_storage().write(contact.email.as_bytes());
-        let _ = self.get_storage().write(b"\n");
+        self.go_next_line();
     }
 
     fn get_storage(&self) -> File {
@@ -21,7 +21,11 @@ impl Contacts {
                 file
             })
     }
-}
+
+    fn go_next_line(&self) {
+        let _ = self.get_storage().write(b"\n");
+    }
+ }
 
 #[cfg(test)]
 mod tests {
