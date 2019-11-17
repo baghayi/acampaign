@@ -15,6 +15,7 @@ pub struct Contact {
     pub email: String
 }
 
+pub mod storage;
 
 
 impl Contact {
