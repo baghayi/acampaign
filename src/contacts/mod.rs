@@ -13,9 +13,6 @@ pub struct Contact {
     pub email: String
 }
 
-
-
-
 impl Contact {
 
     pub fn from_json(data: &str) -> Result<Contact, Error> {
