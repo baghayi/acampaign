@@ -1,3 +1,5 @@
 mod contacts;
+mod errors;
 
-pub use contacts::contact;
+pub use crate::contacts::*;
+pub use crate::errors::Error;
