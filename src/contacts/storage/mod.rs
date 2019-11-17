@@ -7,17 +7,19 @@ pub struct Contacts(&'static str);
 
 impl Contacts {
     pub fn store(&self, contact: &Contact) {
-        let mut contacts = OpenOptions::new()
+        let _ = self.get_storage().write(contact.email.as_bytes());
+        let _ = self.get_storage().write(b"\n");
+    }
+
+    fn get_storage(&self) -> File {
+        OpenOptions::new()
             .append(true)
             .open(self.0)
             .unwrap_or_else(|_| {
                 let mut file = File::create(self.0).unwrap();
                 let _ = file.write(b"email\n");
                 file
-            });
-
-        let _ = contacts.write(contact.email.as_bytes());
-        let _ = contacts.write(b"\n");
+            })
     }
 }
 
