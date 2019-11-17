@@ -8,6 +8,7 @@ pub mod errors {
     pub enum Error {
         InvalidEmail,
         EmailIsMissing,
+        DuplicateContact,
     }
 }
 
