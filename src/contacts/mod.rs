@@ -17,6 +17,7 @@ pub struct Contact {
 }
 
 pub mod storage;
+pub use storage::Storage;
 
 
 impl Contact {

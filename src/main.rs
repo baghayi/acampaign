@@ -2,9 +2,8 @@ extern crate json;
 extern crate addr;
 use std::env;
 use std::fmt;
-use acampaign::contacts::Contact;
+use acampaign::contacts::{Contact, Storage};
 use acampaign::contacts::errors;
-use acampaign::contacts::storage::Contacts;
 
 enum Module {
     Contacts(ModuleCommand),
@@ -59,7 +58,7 @@ fn main() {
 
 fn create_new_contact(input: &String) -> Result<(), errors::Error> {
     let contact = Contact::from_json(input)?;
-    let contacts = Contacts("data/contacts.csv");
+    let contacts = Storage("data/contacts.csv");
     contacts.store(&contact)?;
     Ok(())
 }

@@ -3,9 +3,9 @@ use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use crate::contacts::errors::Error;
 
-pub struct Contacts(pub &'static str);
+pub struct Storage(pub &'static str);
 
-impl Contacts {
+impl Storage {
     pub fn store(&self, contact: &Contact) -> Result<(), Error> {
         if self.is_contact_duplicate(&contact) {
             return Err(Error::DuplicateContact);
@@ -61,7 +61,7 @@ mod tests {
         let filepath = "/tmp/contacts_list_1.txt";
         clean_file(filepath);
         let contact = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
-        let contacts = Contacts(filepath);
+        let contacts = Storage(filepath);
         let _ = contacts.store(&contact);
         assert_eq!("email\nhusen@gmail.com\n", get_file_contents(filepath));
         clean_file(filepath);
@@ -73,7 +73,7 @@ mod tests {
         clean_file(filepath);
         let contact_1 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
         let contact_2 = Contact::from_json("{\"email\":\"mamaly@gmail.com\"}").unwrap();
-        let contacts = Contacts(filepath);
+        let contacts = Storage(filepath);
         let _ = contacts.store(&contact_1);
         let _ = contacts.store(&contact_2);
         assert_eq!("email\nhusen@gmail.com\nmamaly@gmail.com\n", get_file_contents(filepath));
@@ -87,7 +87,7 @@ mod tests {
         clean_file(filepath);
         let contact_1 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
         let contact_2 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
-        let contacts = Contacts(filepath);
+        let contacts = Storage(filepath);
         let _ = contacts.store(&contact_1);
         match contacts.store(&contact_2) {
             Err(e) => assert_eq!(crate::contacts::errors::Error::DuplicateContact, e),
@@ -101,7 +101,7 @@ mod tests {
         clean_file(filepath);
         let contact_1 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
         let contact_2 = Contact::from_json("{\"email\":\"HUSEN@gmail.com\"}").unwrap();
-        let contacts = Contacts(filepath);
+        let contacts = Storage(filepath);
         let _ = contacts.store(&contact_1);
         match contacts.store(&contact_2) {
             Err(e) => assert_eq!(crate::contacts::errors::Error::DuplicateContact, e),
