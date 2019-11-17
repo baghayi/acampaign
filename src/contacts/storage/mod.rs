@@ -36,7 +36,7 @@ impl Contacts {
         let data = fs::read_to_string(&self.0).unwrap();
         let list: Vec<_> = data
             .lines()
-            .filter(|line| line.contains(&contact.email))
+            .filter(|line| line.to_lowercase().contains(&contact.email.to_lowercase()))
             .collect();
         list.len() > 0
     }
@@ -87,6 +87,20 @@ mod tests {
         clean_file(filepath);
         let contact_1 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
         let contact_2 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
+        let contacts = Contacts(filepath);
+        let _ = contacts.store(&contact_1);
+        match contacts.store(&contact_2) {
+            Err(e) => assert_eq!(crate::contacts::errors::Error::DuplicateContact, e),
+            Ok(_) => panic!("cannot store duplicate contact"),
+        }
+    }
+
+    #[test]
+    fn cannot_store_duplicate_contact_with_different_cases() {
+        let filepath = "/tmp/contacts_list_3.txt";
+        clean_file(filepath);
+        let contact_1 = Contact::from_json("{\"email\":\"husen@gmail.com\"}").unwrap();
+        let contact_2 = Contact::from_json("{\"email\":\"HUSEN@gmail.com\"}").unwrap();
         let contacts = Contacts(filepath);
         let _ = contacts.store(&contact_1);
         match contacts.store(&contact_2) {
