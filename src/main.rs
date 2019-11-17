@@ -5,7 +5,8 @@ use std::fmt;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
-use acampaign::{Contact, Error};
+use acampaign::contacts::Contact;
+use acampaign::contacts::errors;
 
 enum Module {
     Contacts(ModuleCommand),
@@ -58,7 +59,7 @@ fn main() {
     }
 }
 
-fn create_new_contact(input: &String) -> Result<(), Error> {
+fn create_new_contact(input: &String) -> Result<(), errors::Error> {
     let filename = "data/contacts.csv";
     let mut needs_header = false;
     let mut contacts = OpenOptions::new()
