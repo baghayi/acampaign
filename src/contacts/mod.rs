@@ -3,34 +3,30 @@ extern crate addr;
 use addr::Email;
 use json::JsonValue::Null;
 
-pub mod errors {
-    #[derive(PartialEq, Eq, Debug)]
-    pub enum Error {
-        InvalidEmail,
-        EmailIsMissing,
-        DuplicateContact,
-    }
-}
+pub mod storage;
+pub use storage::Storage;
+
+pub mod errors;
+pub use errors::Error;
 
 pub struct Contact {
     pub email: String
 }
 
-pub mod storage;
-pub use storage::Storage;
+
 
 
 impl Contact {
 
-    pub fn from_json(data: &str) -> Result<Contact, errors::Error> {
+    pub fn from_json(data: &str) -> Result<Contact, Error> {
         let data = json::parse(data).unwrap();
 
         if data["email"] == Null {
-            return Err(errors::Error::EmailIsMissing);
+            return Err(Error::EmailIsMissing);
         }
 
         if !Contact::is_email_valid(data["email"].as_str().unwrap()) {
-            return Err(errors::Error::InvalidEmail);
+            return Err(Error::InvalidEmail);
         }
 
         Ok(Contact{
@@ -65,7 +61,7 @@ mod tests {
         let contact = Contact::from_json("{\"email\": \"husen@gmail..com\"}");
         match contact {
             Ok(_) => panic!("should not create contact with invalid email address"),
-            Err(error) => assert_eq!(error, errors::Error::InvalidEmail),
+            Err(error) => assert_eq!(error, Error::InvalidEmail),
         }
     }
 
@@ -74,7 +70,7 @@ mod tests {
         let contact = Contact::from_json("{}");
         match contact {
             Ok(_) => panic!("should not create contact when email is missing"),
-            Err(error) => assert_eq!(error, errors::Error::EmailIsMissing),
+            Err(error) => assert_eq!(error, Error::EmailIsMissing),
         }
 
     }

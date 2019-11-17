@@ -1,7 +1,7 @@
 use crate::contacts::Contact;
 use std::fs::{self, File, OpenOptions};
 use std::io::Write;
-use crate::contacts::errors::Error;
+use crate::contacts::Error;
 
 pub struct Storage(pub &'static str);
 
