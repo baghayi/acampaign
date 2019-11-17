@@ -75,8 +75,8 @@ fn create_new_contact(input: &String) -> Result<(), errors::Error> {
     }
 
     let contact = Contact::from_json(input)?;
-    contacts.write(contact.email.as_bytes());
-    contacts.write(b"\n");
+    let _ = contacts.write(contact.email.as_bytes());
+    let _ = contacts.write(b"\n");
 
     Ok(())
 }
