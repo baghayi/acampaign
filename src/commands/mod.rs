@@ -11,19 +11,22 @@ pub trait Command {
     fn run(&mut self);
 }
 
-pub struct Commands<T: Command> {
-    list: HashMap<&'static str, T>,
+pub struct Commands
+{
+    list: HashMap<&'static str, Box<dyn Command>>,
 }
 
-impl<T: Command> Commands<T> {
-    pub fn new() -> Commands<T> {
+impl Commands {
+    pub fn new() -> Commands
+    {
         let commands: HashMap<_, _> = HashMap::new();
         Commands {
             list: commands
         }
     }
 
-    pub fn register(&mut self, command: T) {
+    pub fn register(&mut self, command: Box<dyn Command>)
+    {
         self.list.insert(command.name(), command);
     }
 
@@ -41,48 +44,76 @@ impl<T: Command> Commands<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::{RefCell, RefMut};
+    use std::rc::Rc;
     use super::*;
-    struct ACommand<'a> {
-        buffer: &'a mut String
+    struct ACommand {
+        buffer: Rc<RefCell<String>>
     }
-    impl Command for ACommand<'_> {
+    impl Command for ACommand {
         fn name(&self) -> &'static str {
             "command-name"
         }
 
         fn run(&mut self) {
-            self.buffer.push_str("ran command");
+            let mut text: RefMut<String> = self.buffer.borrow_mut();
+            text.push_str("ran command");
+        }
+    }
+
+    struct BCommand;
+    impl Command for BCommand {
+        fn name(&self) -> &'static str {
+            "command-b"
+        }
+
+        fn run(&mut self) {
+        }
+    }
+
+    struct CCommand;
+    impl Command for CCommand {
+        fn name(&self) -> &'static str {
+            "command-c"
+        }
+
+        fn run(&mut self) {
         }
     }
 
     #[test]
     fn register_a_command() {
-        let mut buffer = String::new();
-        let command = ACommand{buffer: &mut buffer};
         let mut commands = Commands::new();
-        commands.register(command);
+        commands.register(Box::new(BCommand));
     }
 
     #[test]
     fn run_a_registered_command() {
-        let mut buffer = String::new();
-        let command = ACommand{buffer: &mut buffer};
+        let buffer = Rc::new(RefCell::new(String::new()));
+        let command = ACommand{buffer: Rc::clone(&buffer)};
         let mut commands = Commands::new();
-        commands.register(command);
+        commands.register(Box::new(command));
         let _ = commands.run("command-name");
-        assert_eq!(buffer, "ran command");
+        assert_eq!(*buffer.borrow(), "ran command");
     }
 
     #[test]
     fn not_found_command_error_when_trying_to_run_an_undefined_command() {
-        let mut buffer = String::new();
-        let command = ACommand{buffer: &mut buffer};
         let mut commands = Commands::new();
-        commands.register(command);
+        commands.register(Box::new(BCommand));
         let result = commands.run("undefined");
         match result {
             Err(e) => assert_eq!(Error::UndefinedCommand, e),
             Ok(_) => panic!("cannot run undefined command"),
         }
+    }
+
+    #[test]
+    fn register_different_commands() {
+        let command_b = BCommand;
+        let command_c = CCommand;
+        let mut commands = Commands::new();
+        commands.register(Box::new(command_b));
+        commands.register(Box::new(command_c));
     }
 }
